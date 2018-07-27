@@ -1,6 +1,98 @@
-import React from 'react';
-import {Card, CardImg, CardText, CardTitle, CardBody, Breadcrumb, BreadcrumbItem} from 'reactstrap';
+import React, {Component} from 'react';
+import {Card, CardImg, CardText, CardTitle, CardBody, Breadcrumb, BreadcrumbItem,
+        Button, Modal, ModalBody, ModalHeader, Col, Row, Label} from 'reactstrap';
+import {LocalForm, Control, Errors} from 'react-redux-form';
 import {Link} from 'react-router-dom';
+
+const required = (value) => value && value.length;
+const minLength = (length) => (value) => (value) && (value.length >= length);
+const maxLength = (length) => (value) => !(value) || (value.length <= length);
+
+class CommentForm extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      isCommentModalOpen:false
+    };
+
+    this.toggleCommentModal = this.toggleCommentModal.bind(this);
+    this.handleComment = this.handleComment.bind(this);
+  }
+
+  toggleCommentModal() {
+    this.setState({
+      isCommentModalOpen: !this.state.isCommentModalOpen
+    });
+  }
+
+  handleComment(values) {
+    this.toggleCommentModal();
+    console.log("Current comment state is: " + JSON.stringify(values));
+    alert("Current comment state is: " + JSON.stringify(values));
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <div>
+          <Button outline onClick={this.toggleCommentModal}>
+            <span className="fa fa-edit fa-lg"></span> Submit Comment
+          </Button>
+        </div>
+        <Modal isOpen={this.state.isCommentModalOpen} toggle={this.toggleCommentModal}>
+          <ModalHeader isOpen={this.state.isCommentModalOpen} toggle={this.toggleCommentModal}>Submit Comment</ModalHeader>
+          <ModalBody>
+            <LocalForm onSubmit={(values) => this.handleComment(values)}>
+              <Row className="form-group">
+                <Label htmlFor="rating" md={12}>Rating</Label>
+                <Col md={12}>
+                  <Control.select model=".rating" name="rating" className="form-control">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                  </Control.select>
+                </Col>
+              </Row>
+              <Row className="form-group">
+                <Label htmlFor="author" md={12}>Your Name</Label>
+                <Col md={12}>
+                  <Control.text model=".author" name="author"
+                    className="form-control" placeholder="Your Name"
+                    validators={{minLength: minLength(3),
+                      maxLength: maxLength(15)}}
+                    />
+                    <Errors
+                      className="text-danger" model=".author"
+                      show="touched" messages={{
+                        required: "Required",
+                        minLength: "Must be greater than 2 characters",
+                        maxLength: "Must be 15 characters or less"
+                      }}
+                    />
+                </Col>
+              </Row>
+              <Row className="form-group">
+                <Label htmlFor="comment" md={12}>Comment</Label>
+                <Col md={12}>
+                  <Control.textarea model=".comment" id="comment" name="comment"
+                    rows="6"  className="form-control"/>
+                </Col>
+              </Row>
+              <Row className="form-group">
+                <Col md={2}>
+                  <Button type="submit" value="submit" color="primary">Submit</Button>
+                </Col>
+              </Row>
+            </LocalForm>
+          </ModalBody>
+        </Modal>
+      </React.Fragment>
+    );
+  }
+}
 
 
 function RenderDish({dish}) {
@@ -33,10 +125,11 @@ function RenderComments({comments}) {
         <ul className="list-unstyled">
           {commentList}
         </ul>
+        <CommentForm />
       </div>
     );
   } else {
-    return (<div></div>);
+    return (<div><CommentForm /></div>);
   }
 }
 
